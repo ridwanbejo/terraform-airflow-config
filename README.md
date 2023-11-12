@@ -109,25 +109,14 @@ This is the output when you run terraform plan successfully:
 ```
 ...
 
- # module.tf_airflow_users.airflow_pool.pools["test-pool-2"] will be created
-  + resource "airflow_pool" "pools" {
-      + id             = (known after apply)
-      + name           = "test-pool-2"
-      + occupied_slots = (known after apply)
-      + open_slots     = (known after apply)
-      + queued_slots   = (known after apply)
-      + slots          = 3
-      + used_slots     = (known after apply)
-    }
-
-  # module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"] will be created
+  # module.tf_airflow_config.airflow_variable.variables["TEST_VAR_1"] will be created
   + resource "airflow_variable" "variables" {
       + id    = (known after apply)
       + key   = "TEST_VAR_1"
       + value = "my value"
     }
 
-  # module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"] will be created
+  # module.tf_airflow_config.airflow_variable.variables["TEST_VAR_2"] will be created
   + resource "airflow_variable" "variables" {
       + id    = (known after apply)
       + key   = "TEST_VAR_2"
@@ -162,24 +151,24 @@ $ terraform apply -auto-approve
 ```
 ...
 
-module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"]: Creating...
-module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"]: Creating...
-module.tf_airflow_users.airflow_connection.connections["test-connection-2"]: Creating...
-module.tf_airflow_users.airflow_pool.pools["test-pool-2"]: Creating...
-module.tf_airflow_users.airflow_connection.connections["test-connection-1"]: Creating...
-module.tf_airflow_users.airflow_pool.pools["test-pool-1"]: Creating...
-2023-11-12T17:10:28.483+0700 [WARN]  Provider "module.tf_airflow_users.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_users.airflow_connection.connections["test-connection-2"], but we are tolerating it because it is using the legacy plugin SDK.
+module.tf_airflow_config.airflow_variable.variables["TEST_VAR_1"]: Creating...
+module.tf_airflow_config.airflow_variable.variables["TEST_VAR_2"]: Creating...
+module.tf_airflow_config.airflow_pool.pools["test-pool-1"]: Creating...
+module.tf_airflow_config.airflow_pool.pools["test-pool-2"]: Creating...
+module.tf_airflow_config.airflow_connection.connections["test-connection-1"]: Creating...
+module.tf_airflow_config.airflow_connection.connections["test-connection-2"]: Creating...
+module.tf_airflow_config.airflow_pool.pools["test-pool-1"]: Creation complete after 0s [id=test-pool-1]
+2023-11-12T17:47:34.107+0700 [WARN]  Provider "module.tf_airflow_config.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_config.airflow_connection.connections["test-connection-2"], but we are tolerating it because it is using the legacy plugin SDK.
     The following problems may be the cause of any confusing errors from downstream operations:
       - .extra: was cty.StringVal("{\"sslca\":\"/tmp/server-ca.pem\",\"sslcert\":\"/tmp/client-cert.pem\",\"sslkey\":\"/tmp/client-key.pem\",\"sslmode\":\"verify-ca\"}"), but now cty.StringVal("{\"sslca\": \"/tmp/server-ca.pem\", \"sslcert\": \"/tmp/client-cert.pem\", \"sslkey\": \"/tmp/client-key.pem\", \"sslmode\": \"verify-ca\"}")
-module.tf_airflow_users.airflow_connection.connections["test-connection-2"]: Creation complete after 0s [id=test-connection-2]
-2023-11-12T17:10:28.552+0700 [WARN]  Provider "module.tf_airflow_users.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_users.airflow_connection.connections["test-connection-1"], but we are tolerating it because it is using the legacy plugin SDK.
+module.tf_airflow_config.airflow_connection.connections["test-connection-2"]: Creation complete after 0s [id=test-connection-2]
+2023-11-12T17:47:34.274+0700 [WARN]  Provider "module.tf_airflow_config.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_config.airflow_connection.connections["test-connection-1"], but we are tolerating it because it is using the legacy plugin SDK.
     The following problems may be the cause of any confusing errors from downstream operations:
       - .extra: was cty.StringVal("{\"charset\":\"utf8\",\"cursor\":\"sscursor\",\"local_infile\":\"true\",\"unix_socket\":\"/var/socket\"}"), but now cty.StringVal("{\"charset\": \"utf8\", \"cursor\": \"sscursor\", \"local_infile\": \"true\", \"unix_socket\": \"/var/socket\"}")
-module.tf_airflow_users.airflow_connection.connections["test-connection-1"]: Creation complete after 1s [id=test-connection-1]
-module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"]: Creation complete after 1s [id=TEST_VAR_1]
-module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"]: Creation complete after 1s [id=TEST_VAR_2]
-module.tf_airflow_users.airflow_pool.pools["test-pool-1"]: Creation complete after 1s [id=test-pool-1]
-module.tf_airflow_users.airflow_pool.pools["test-pool-2"]: Creation complete after 1s [id=test-pool-2]
+module.tf_airflow_config.airflow_connection.connections["test-connection-1"]: Creation complete after 0s [id=test-connection-1]
+module.tf_airflow_config.airflow_variable.variables["TEST_VAR_2"]: Creation complete after 0s [id=TEST_VAR_2]
+module.tf_airflow_config.airflow_pool.pools["test-pool-2"]: Creation complete after 0s [id=test-pool-2]
+module.tf_airflow_config.airflow_variable.variables["TEST_VAR_1"]: Creation complete after 0s [id=TEST_VAR_1]
 
 Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
 

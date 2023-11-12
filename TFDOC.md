@@ -31,7 +31,7 @@ No modules.
 | <a name="input_airflow_hostname"></a> [airflow\_hostname](#input\_airflow\_hostname) | n/a | `string` | n/a | yes |
 | <a name="input_airflow_password"></a> [airflow\_password](#input\_airflow\_password) | n/a | `string` | n/a | yes |
 | <a name="input_airflow_username"></a> [airflow\_username](#input\_airflow\_username) | n/a | `string` | n/a | yes |
-| <a name="input_connections"></a> [connections](#input\_connections) | n/a | <pre>list(object({<br>    connection_id = string<br>    conn_type     = string<br>    host          = string<br>    decription    = string<br>    login         = string<br>    schema        = string<br>    port          = string<br>    password      = string<br>    extra         = string<br>  }))</pre> | n/a | yes |
+| <a name="input_connections"></a> [connections](#input\_connections) | n/a | <pre>list(object({<br>    connection_id = string<br>    conn_type     = string<br>    host          = optional(string)<br>    description   = optional(string)<br>    login         = optional(string)<br>    schema        = optional(string)<br>    port          = optional(number)<br>    password      = optional(string)<br>    extra         = optional(any)<br>  }))</pre> | n/a | yes |
 | <a name="input_pools"></a> [pools](#input\_pools) | n/a | <pre>list(object({<br>    name  = string<br>    slots = number<br>  }))</pre> | n/a | yes |
 | <a name="input_variables"></a> [variables](#input\_variables) | n/a | <pre>list(object({<br>    key   = string<br>    value = string<br>  }))</pre> | n/a | yes |
 
