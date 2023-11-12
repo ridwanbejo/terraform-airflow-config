@@ -1,4 +1,4 @@
-# Terraform Airflow User
+# Terraform Airflow Config
 
 This is a Terraform module for managing configuration at Apache Airflow. You can use this module both for commercial or non-commercial purposes.
 
@@ -198,12 +198,21 @@ There are some scenarios that you could choose by using this module. For example
 1. you can create variables as shown at section B.  That's the only scenario.
 2. you can create pools as shown at section B. That's the only scenario.
 3. you can create multiple connections. But there are so many connection type that you have to find out. You can check in this official guide -> [Airflow - Managing Connections](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html)
-4. for the extra field when you create connections, basically the data type is JSON format
-5. for the password, better you store the password at secret store solution such as Hashicorp Vault. Then, fetch the password to the Terraform project. You can check `examples/sample-2` to see how it works. `DON'T STORE PASSWORD on YOUR TF FILES`
+   1. for the extra field when you create connections, basically the data type is JSON format
+   2. for the password, you can store the plain text on your tfvars. As long, you don't expose your repo to public. **But still it's huge threat for your company**.
+   3. It's better for you to store the password at secret store solution such as Hashicorp Vault. Then, fetch the password to the Terraform project.
+   4. You can check `examples/sample-2` to see how it works.
 
-### C.2. using Hashicorp Vault
+### C.2. by using Hashicorp Vault
 
-Below is `airflow_connections` in `terraform.tfvars` with Vault integration:
+Vault token is required. Please export the Vault token on your environment once you get it from your system administrator:
+
+```
+# for example
+export TF_VAR_vault_token=myroot
+```
+
+Below is `airflow_connections` in `terraform.tfvars` with Vault integration. Ensure that you leave the password with empty string:
 
 ```
 airflow_connections = [
@@ -274,6 +283,103 @@ airflow_connections = [
 ]
 ```
 
+Now, we have to configure Vault at `providers.tf`. First, you include the provider. Second, you choose the Vault path to fetch your keys:
+
+```
+terraform {
+  required_version = ">= 1.4"
+
+  required_providers {
+    airflow = {
+      source  = "DrFaust92/airflow"
+      version = "0.13.1"
+    }
+
+    vault = {
+      source  = "hashicorp/vault"
+      version = "1.3.3"
+    }
+  }
+}
+
+provider "vault" {
+  address = "http://localhost:8200"
+  token   = var.vault_token
+}
+
+data "vault_generic_secret" "tf_airflow_connection_passwords" {
+  path = "secret/tf-airflow"
+}
+```
+
+Now, the most important part of the Vault integration with Terraform project is your logic at `locals.tf` which is totally different with `sample-1``. You have to load the secret based on your vault key naming format (e.g. `<connection_id>_<conn_type>_password`):
+
+```
+locals {
+  pools     = var.airflow_pools
+  variables = var.airflow_variables
+  connections = [
+    for conn in var.airflow_connections : {
+      connection_id = conn["connection_id"]
+      conn_type     = conn["conn_type"]
+      host          = conn["host"]
+      description   = conn["description"]
+      port          = conn["port"]
+      login         = conn["login"]
+      schema        = conn["schema"]
+      extra         = conn["extra"]
+      password      = can(data.vault_generic_secret.tf_airflow_connection_passwords.data[format("%s_%s_password", conn.connection_id, conn.conn_type)]) ? data.vault_generic_secret.tf_airflow_connection_passwords.data[format("%s_%s_password", conn.connection_id, conn.conn_type)] : ""
+    }
+  ]
+}
+
+```
+
+Before you run your Terraform project, please ensure that you store the connection passwords at Vault such below:
+
+![](https://user-images.githubusercontent.com/907116/282330063-cf6b498c-bde4-48a1-b18b-2165ef272880.png)
+
+Now you can re-run your project and see how it will be:
+
+```
+$ terraform init
+$ terraform plan
+$ terraform apply -auto-approve
+```
+
+You can see your connection passwords at Vault are written in `terraform.tfstate`:
+
+```
+...
+        {
+          "index_key": "test-connection-1",
+          "schema_version": 0,
+          "attributes": {
+            ...
+            "id": "test-connection-1",
+            "login": "mysql_user",
+            "password": "mypassword_12345",
+            "port": 3306,
+            "schema": "my_schema"
+          },
+          ...
+        },
+        {
+          "index_key": "test-connection-2",
+          "schema_version": 0,
+          "attributes": {
+            ...
+            "id": "test-connection-2",
+            "login": "pguser",
+            "password": "pgpassword_12345",
+            "port": 5432,
+            "schema": "your_schema"
+          },
+          ...
+        },
+...
+```
+
 ## D. Ensuring quality
 
 I am trying to follow these approaches for ensuring quality of the tf-module:
@@ -298,8 +404,8 @@ The tools:
 
 ## E. How to contribute ?
 
-If you find any issue, you can raise it here at our [Issue Tracker](https://github.com/ridwanbejo/terraform-airflow-user/issues)
+If you find any issue, you can raise it here at our [Issue Tracker](https://github.com/ridwanbejo/terraform-airflow-config/issues)
 
-If you have something that you want to merge to this repo, just raise [Pull Requests](https://github.com/ridwanbejo/terraform-airflow-user/pulls)
+If you have something that you want to merge to this repo, just raise [Pull Requests](https://github.com/ridwanbejo/terraform-airflow-config/pulls)
 
 Ensure that you install all the tools from section D. for development purpose.
