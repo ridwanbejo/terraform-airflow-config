@@ -1,5 +1,5 @@
 resource "airflow_variable" "variables" {
-  for_each = { for idx, item in var.variables : item.name => item }
+  for_each = { for idx, item in var.variables : item.key => item }
 
   key   = each.value.key
   value = each.value.value
@@ -23,5 +23,5 @@ resource "airflow_connection" "connections" {
   schema        = each.value.schema
   port          = each.value.port
   password      = each.value.password
-  extra         = each.value.extra
+  extra         = jsonencode(each.value.extra)
 }

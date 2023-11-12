@@ -38,77 +38,61 @@ $ export TF_VAR_airflow_password=airflow
 - Create `terraform.tfvars` inside the Project. Then copy this sample terraform.tfvars into the file:
 
 ```
-airflow_roles = [
-  {
-    name    = "custom-role-1"
-    actions = [
-      {
-        name     = "can_read"
-        resource = "Audit Logs"
-      }
-    ]
-  },
-  {
-    name    = "custom-role-2"
-    actions = [
-      {
-        name     = "can_read"
-        resource = "Audit Logs"
-      },
-      {
-        name     = "can_read"
-        resource = "DAGs"
-      }
-    ]
-  },
-  {
-    name    = "custom-role-3"
-    actions = [
-      {
-        name     = "can_read"
-        resource = "Variables"
-      }
-    ]
-  },
-]
+airflow_variables = [
+    {
+        key = "TEST_VAR_1"
+        value = "my value"
+    },
+    {
+        key = "TEST_VAR_2"
+        value = "your value"
+    }
+ ]
 
-airflow_users = [
-  {
-    email      = "ridwanbejo@gmail.com"
-    first_name = "Ridwan"
-    last_name  = "Bejo"
-    username   = "ridwanbejo"
-    roles      = ["Viewer"]
-  },
-  {
-    email      = "sakura.machiya@gmail.com"
-    first_name = "Sakura"
-    last_name  = "Machiya"
-    username   = "sakuramachi"
-    roles      = ["Viewer"]
-  },
-  {
-    email      = "peter.dart@gmail.com"
-    first_name = "Peter"
-    last_name  = "Dart"
-    username   = "peterdart"
-    roles      = ["custom-role-1"]
-  },
-  {
-    email      = "eliza.fangerbau@gmail.com"
-    first_name = "Eliza"
-    last_name  = "Fangerbau"
-    username   = "elizafang"
-    roles      = ["custom-role-2"]
-  },
-  {
-    email      = "michelle.wang@gmail.com"
-    first_name = "Michelle"
-    last_name  = "Wang"
-    username   = "michwang"
-    roles      = ["custom-role-2", "custom-role-3"]
-  }
-]
+ airflow_pools = [
+    {
+        name  = "test-pool-1"
+        slots = 2
+    },
+    {
+        name  = "test-pool-2"
+        slots = 3
+    }
+ ]
+
+
+ airflow_connections = [
+    {
+        connection_id = "test-connection-1"
+        conn_type     = "MySQL"
+        host          = "10.101.80.90"
+        description   = "lorem ipsum sit dolor amet - 1"
+        port          = 3306
+        login         = "mysql_user"
+        schema        = "my_schema"
+        extra         = {
+            charset      = "utf8"
+            cursor       = "sscursor"
+            local_infile = "true"
+            unix_socket  = "/var/socket"
+        }
+    },
+    {
+        connection_id = "test-connection-2"
+        conn_type     = "Postgres"
+        host          = "10.101.80.92"
+        description   = "lorem ipsum sit dolor amet - 2"
+        port          = 5432
+        login         = "pguser"
+        schema        = "your_schema"
+        extra         = {
+            sslmode = "verify-ca"
+            sslcert = "/tmp/client-cert.pem"
+            sslca   = "/tmp/server-ca.pem"
+            sslkey  = "/tmp/client-key.pem"
+        }
+    }
+ ]
  ```
 
 - Adjust the tfvars based on your requirements. The tfvars above is just example. Then, Save it
