@@ -39,60 +39,62 @@ $ export TF_VAR_airflow_password=airflow
 
 ```
 airflow_variables = [
-    {
-        key = "TEST_VAR_1"
-        value = "my value"
-    },
-    {
-        key = "TEST_VAR_2"
-        value = "your value"
-    }
- ]
+  {
+    key   = "TEST_VAR_1"
+    value = "my value"
+  },
+  {
+    key   = "TEST_VAR_2"
+    value = "your value"
+  }
+]
 
- airflow_pools = [
-    {
-        name  = "test-pool-1"
-        slots = 2
-    },
-    {
-        name  = "test-pool-2"
-        slots = 3
-    }
- ]
+airflow_pools = [
+  {
+    name  = "test-pool-1"
+    slots = 2
+  },
+  {
+    name  = "test-pool-2"
+    slots = 3
+  }
+]
 
 
- airflow_connections = [
-    {
-        connection_id = "test-connection-1"
-        conn_type     = "MySQL"
-        host          = "10.101.80.90"
-        description   = "lorem ipsum sit dolor amet - 1"
-        port          = 3306
-        login         = "mysql_user"
-        schema        = "my_schema"
-        extra         = {
-            charset      = "utf8"
-            cursor       = "sscursor"
-            local_infile = "true"
-            unix_socket  = "/var/socket"
-        }
-    },
-    {
-        connection_id = "test-connection-2"
-        conn_type     = "Postgres"
-        host          = "10.101.80.92"
-        description   = "lorem ipsum sit dolor amet - 2"
-        port          = 5432
-        login         = "pguser"
-        schema        = "your_schema"
-        extra         = {
-            sslmode = "verify-ca"
-            sslcert = "/tmp/client-cert.pem"
-            sslca   = "/tmp/server-ca.pem"
-            sslkey  = "/tmp/client-key.pem"
-        }
+airflow_connections = [
+  {
+    connection_id = "test-connection-1"
+    conn_type     = "MySQL"
+    host          = "10.101.80.90"
+    description   = "lorem ipsum sit dolor amet - 1"
+    port          = 3306
+    login         = "mysql_user"
+    password      = "mypassword" # THIS IS BAD PRACTICE. PLEASE USE VAULT INSTEAD...
+    schema        = "my_schema"
+    extra = {
+      charset      = "utf8"
+      cursor       = "sscursor"
+      local_infile = "true"
+      unix_socket  = "/var/socket"
     }
- ]
+  },
+  {
+    connection_id = "test-connection-2"
+    conn_type     = "Postgres"
+    host          = "10.101.80.92"
+    description   = "lorem ipsum sit dolor amet - 2"
+    port          = 5432
+    login         = "pguser"
+    password      = "pgpassword" # THIS IS BAD PRACTICE. PLEASE USE VAULT INSTEAD...
+    schema        = "your_schema"
+    extra = {
+      sslmode = "verify-ca"
+      sslcert = "/tmp/client-cert.pem"
+      sslca   = "/tmp/server-ca.pem"
+      sslkey  = "/tmp/client-key.pem"
+    }
+  }
+]
  ```
 
 - Adjust the tfvars based on your requirements. The tfvars above is just example. Then, Save it
@@ -107,33 +109,45 @@ This is the output when you run terraform plan successfully:
 ```
 ...
 
- # module.tf_airflow_users.random_password.password["sakuramachi"] will be created
-  + resource "random_password" "password" {
-      + bcrypt_hash      = (sensitive value)
-      + id               = (known after apply)
-      + length           = 16
-      + lower            = true
-      + min_lower        = 0
-      + min_numeric      = 0
-      + min_special      = 0
-      + min_upper        = 0
-      + number           = true
-      + numeric          = true
-      + override_special = "!#$%&*()-_=+[]{}<>:?"
-      + result           = (sensitive value)
-      + special          = true
-      + upper            = true
+ # module.tf_airflow_users.airflow_pool.pools["test-pool-2"] will be created
+  + resource "airflow_pool" "pools" {
+      + id             = (known after apply)
+      + name           = "test-pool-2"
+      + occupied_slots = (known after apply)
+      + open_slots     = (known after apply)
+      + queued_slots   = (known after apply)
+      + slots          = 3
+      + used_slots     = (known after apply)
     }
 
-Plan: 13 to add, 0 to change, 0 to destroy.
+  # module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"] will be created
+  + resource "airflow_variable" "variables" {
+      + id    = (known after apply)
+      + key   = "TEST_VAR_1"
+      + value = "my value"
+    }
+
+  # module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"] will be created
+  + resource "airflow_variable" "variables" {
+      + id    = (known after apply)
+      + key   = "TEST_VAR_2"
+      + value = "your value"
+    }
+
+Plan: 6 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  + airflow_users = {
-      + elizafang   = "eliza.fangerbau@gmail.com"
-      + michwang    = "michelle.wang@gmail.com"
-      + peterdart   = "peter.dart@gmail.com"
-      + ridwanbejo  = "ridwanbejo@gmail.com"
-      + sakuramachi = "sakura.machiya@gmail.com"
+  + airflow_connections = {
+      + test-connection-1 = "MySQL"
+      + test-connection-2 = "Postgres"
+    }
+  + airflow_pools       = {
+      + test-pool-1 = 2
+      + test-pool-2 = 3
+    }
+  + airflow_variables   = {
+      + TEST_VAR_1 = "my value"
+      + TEST_VAR_2 = "your value"
     }
 ```
 
@@ -148,99 +162,54 @@ $ terraform apply -auto-approve
 ```
 ...
 
-module.tf_airflow_users.random_password.password["elizafang"]: Creation complete after 0s [id=none]
-module.tf_airflow_users.random_password.password["peterdart"]: Creation complete after 0s [id=none]
-module.tf_airflow_users.random_password.password["ridwanbejo"]: Creation complete after 0s [id=none]
-module.tf_airflow_users.airflow_role.roles["custom-role-1"]: Creation complete after 0s [id=custom-role-1]
-module.tf_airflow_users.airflow_role.roles["custom-role-2"]: Creation complete after 0s [id=custom-role-2]
-module.tf_airflow_users.airflow_role.roles["custom-role-3"]: Creation complete after 0s [id=custom-role-3]
-module.tf_airflow_users.airflow_user.users["elizafang"]: Creating...
-module.tf_airflow_users.airflow_user.users["ridwanbejo"]: Creating...
-module.tf_airflow_users.airflow_user.users["sakuramachi"]: Creating...
-module.tf_airflow_users.airflow_user.users["michwang"]: Creating...
-module.tf_airflow_users.airflow_user.users["peterdart"]: Creating...
-module.tf_airflow_users.airflow_user.users["sakuramachi"]: Creation complete after 1s [id=sakuramachi]
-module.tf_airflow_users.airflow_user.users["elizafang"]: Creation complete after 1s [id=elizafang]
-module.tf_airflow_users.airflow_user.users["michwang"]: Creation complete after 1s [id=michwang]
-module.tf_airflow_users.airflow_user.users["ridwanbejo"]: Creation complete after 1s [id=ridwanbejo]
-module.tf_airflow_users.airflow_user.users["peterdart"]: Creation complete after 1s [id=peterdart]
+module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"]: Creating...
+module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"]: Creating...
+module.tf_airflow_users.airflow_connection.connections["test-connection-2"]: Creating...
+module.tf_airflow_users.airflow_pool.pools["test-pool-2"]: Creating...
+module.tf_airflow_users.airflow_connection.connections["test-connection-1"]: Creating...
+module.tf_airflow_users.airflow_pool.pools["test-pool-1"]: Creating...
+2023-11-12T17:10:28.483+0700 [WARN]  Provider "module.tf_airflow_users.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_users.airflow_connection.connections["test-connection-2"], but we are tolerating it because it is using the legacy plugin SDK.
+    The following problems may be the cause of any confusing errors from downstream operations:
+      - .extra: was cty.StringVal("{\"sslca\":\"/tmp/server-ca.pem\",\"sslcert\":\"/tmp/client-cert.pem\",\"sslkey\":\"/tmp/client-key.pem\",\"sslmode\":\"verify-ca\"}"), but now cty.StringVal("{\"sslca\": \"/tmp/server-ca.pem\", \"sslcert\": \"/tmp/client-cert.pem\", \"sslkey\": \"/tmp/client-key.pem\", \"sslmode\": \"verify-ca\"}")
+module.tf_airflow_users.airflow_connection.connections["test-connection-2"]: Creation complete after 0s [id=test-connection-2]
+2023-11-12T17:10:28.552+0700 [WARN]  Provider "module.tf_airflow_users.provider[\"registry.terraform.io/drfaust92/airflow\"]" produced an unexpected new value for module.tf_airflow_users.airflow_connection.connections["test-connection-1"], but we are tolerating it because it is using the legacy plugin SDK.
+    The following problems may be the cause of any confusing errors from downstream operations:
+      - .extra: was cty.StringVal("{\"charset\":\"utf8\",\"cursor\":\"sscursor\",\"local_infile\":\"true\",\"unix_socket\":\"/var/socket\"}"), but now cty.StringVal("{\"charset\": \"utf8\", \"cursor\": \"sscursor\", \"local_infile\": \"true\", \"unix_socket\": \"/var/socket\"}")
+module.tf_airflow_users.airflow_connection.connections["test-connection-1"]: Creation complete after 1s [id=test-connection-1]
+module.tf_airflow_users.airflow_variable.variables["TEST_VAR_1"]: Creation complete after 1s [id=TEST_VAR_1]
+module.tf_airflow_users.airflow_variable.variables["TEST_VAR_2"]: Creation complete after 1s [id=TEST_VAR_2]
+module.tf_airflow_users.airflow_pool.pools["test-pool-1"]: Creation complete after 1s [id=test-pool-1]
+module.tf_airflow_users.airflow_pool.pools["test-pool-2"]: Creation complete after 1s [id=test-pool-2]
 
-Apply complete! Resources: 13 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-airflow_users = {
-  "elizafang" = "eliza.fangerbau@gmail.com"
-  "michwang" = "michelle.wang@gmail.com"
-  "peterdart" = "peter.dart@gmail.com"
-  "ridwanbejo" = "ridwanbejo@gmail.com"
-  "sakuramachi" = "sakura.machiya@gmail.com"
+airflow_connections = {
+  "test-connection-1" = "MySQL"
+  "test-connection-2" = "Postgres"
+}
+airflow_pools = {
+  "test-pool-1" = 2
+  "test-pool-2" = 3
+}
+airflow_variables = {
+  "TEST_VAR_1" = "my value"
+  "TEST_VAR_2" = "your value"
 }
 ```
 
-Now you can check the Airflow List Roles page and List User page to see the applied changes.
+Now you can check the Airflow variables, connections and pools at Admin section to see the applied changes.
 
 ## C. Understanding tfvars scenarios
 
 There are some scenarios that you could choose by using this module. For example:
 
-1. create users without specifying custom role. For example you can choose `Viewer` role and assign it to users.
-
-```
-airflow_users = [
-  {
-    email      = "ridwanbejo@gmail.com"
-    first_name = "Ridwan"
-    last_name  = "Bejo"
-    username   = "ridwanbejo"
-    roles      = ["Viewer"]
-  },
-  {
-    email      = "sakura.machiya@gmail.com"
-    first_name = "Sakura"
-    last_name  = "Machiya"
-    username   = "sakuramachi"
-    roles      = ["Viewer"]
-  }
-]
-```
-
-> In Airflow, there are some roles by default when you have Airflow fresh installation. Those roles are `Admin`, `Viewer`, `User`, `Op`, `Public`. I use `Viewer` because that was the default role which are provided by Airflow.
-
-2. create users with custom role
-
-```
-airflow_users = [
-  {
-    email      = "peter.dart@gmail.com"
-    first_name = "Peter"
-    last_name  = "Dart"
-    username   = "peterdart"
-    roles      = ["custom-role-1"]
-  },
-  {
-    email      = "eliza.fangerbau@gmail.com"
-    first_name = "Eliza"
-    last_name  = "Fangerbau"
-    username   = "elizafang"
-    roles      = ["custom-role-2"]
-  }
-]
-```
-
-3. create user with multiple roles
-
-```
-airflow_users = [
-  {
-    email      = "michelle.wang@gmail.com"
-    first_name = "Michelle"
-    last_name  = "Wang"
-    username   = "michwang"
-    roles      = ["custom-role-2", "custom-role-3"]
-  }
-]
-```
+1. you can create variables as shown at section B.  That's the only scenario.
+2. you can create pools as shown at section B. That's the only scenario.
+3. you can create multiple connections. But there are so many connection type that you have to find out. You can check in this official guide -> [Airflow - Managing Connections](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html)
+4. for the extra field when you create connections, basically the data type is JSON format
+5. for the password, better you store the password at secret store solution such as Hashicorp Vault. Then, fetch the password to the Terraform project. You can check `examples/sample-2` to see how it works. `DON'T STORE PASSWORD on YOUR TF FILES`
 
 ## D. Ensuring quality
 
