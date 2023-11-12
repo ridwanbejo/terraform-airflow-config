@@ -6,11 +6,6 @@ terraform {
       source  = "DrFaust92/airflow"
       version = "0.13.1"
     }
-
-    random = {
-      source  = "hashicorp/random"
-      version = "3.5.1"
-    }
   }
 }
 
