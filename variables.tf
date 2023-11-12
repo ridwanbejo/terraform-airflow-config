@@ -28,12 +28,12 @@ variable "connections" {
   type = list(object({
     connection_id = string
     conn_type     = string
-    host          = string
-    decription    = string
-    login         = string
-    schema        = string
-    port          = string
-    password      = string
-    extra         = string
+    host          = optional(string)
+    description   = optional(string)
+    login         = optional(string)
+    schema        = optional(string)
+    port          = optional(number)
+    password      = optional(string)
+    extra         = optional(any)
   }))
 }

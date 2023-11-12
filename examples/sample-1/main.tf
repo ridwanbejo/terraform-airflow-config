@@ -2,8 +2,8 @@
 # export TF_VAR_airflow_username=airflow
 # export TF_VAR_airflow_password=airflow
 
-module "tf_airflow_users" {
-  source = "../"
+module "tf_airflow_config" {
+  source = "../../"
 
   airflow_hostname = "http://localhost:8080"
   airflow_username = var.airflow_username
