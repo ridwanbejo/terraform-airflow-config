@@ -60,7 +60,6 @@ airflow_pools = [
   }
 ]
 
-
 airflow_connections = [
   {
     connection_id = "test-connection-1"
@@ -192,6 +191,8 @@ Now you can check the Airflow variables, connections and pools at Admin section 
 
 ## C. Understanding tfvars scenarios
 
+### C.1. without using Hashicorp Vault
+
 There are some scenarios that you could choose by using this module. For example:
 
 1. you can create variables as shown at section B.  That's the only scenario.
@@ -199,6 +200,79 @@ There are some scenarios that you could choose by using this module. For example
 3. you can create multiple connections. But there are so many connection type that you have to find out. You can check in this official guide -> [Airflow - Managing Connections](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html)
 4. for the extra field when you create connections, basically the data type is JSON format
 5. for the password, better you store the password at secret store solution such as Hashicorp Vault. Then, fetch the password to the Terraform project. You can check `examples/sample-2` to see how it works. `DON'T STORE PASSWORD on YOUR TF FILES`
+
+### C.2. using Hashicorp Vault
+
+Below is `airflow_connections` in `terraform.tfvars` with Vault integration:
+
+```
+airflow_connections = [
+  {
+    connection_id = "test-connection-1"
+    conn_type     = "mysql"
+    host          = "10.101.80.90"
+    description   = "lorem ipsum sit dolor amet - 1"
+    port          = 3306
+    login         = "mysql_user"
+    password      = ""
+    schema        = "my_schema"
+    extra = {
+      charset      = "utf8"
+      cursor       = "sscursor"
+      local_infile = "true"
+      unix_socket  = "/var/socket"
+    }
+  },
+  {
+    connection_id = "test-connection-2"
+    conn_type     = "postgres"
+    host          = "10.101.80.92"
+    description   = "lorem ipsum sit dolor amet - 2"
+    port          = 5432
+    login         = "pguser"
+    password      = ""
+    schema        = "your_schema"
+    extra = {
+      sslmode = "verify-ca"
+      sslcert = "/tmp/client-cert.pem"
+      sslca   = "/tmp/server-ca.pem"
+      sslkey  = "/tmp/client-key.pem"
+    }
+  },
+  {
+    connection_id = "test-connection-3"
+    conn_type     = "oracle"
+    host          = "10.101.80.93"
+    description   = "lorem ipsum sit dolor amet - 3"
+    port          = 1521
+    login         = "mydba"
+    password      = ""
+    schema        = "ora_schema"
+    extra = {
+      sslmode = "verify-ca"
+      sslcert = "/tmp/client-cert.pem"
+      sslca   = "/tmp/server-ca.pem"
+      sslkey  = "/tmp/client-key.pem"
+    }
+  },
+  {
+    connection_id = "test-connection-4"
+    conn_type     = "mysql"
+    host          = "10.101.80.94"
+    description   = "lorem ipsum sit dolor amet - 4"
+    port          = 3306
+    login         = "myadmin"
+    password      = ""
+    schema        = "myr_schema"
+    extra = {
+      sslmode = "verify-ca"
+      sslcert = "/tmp/client-cert.pem"
+      sslca   = "/tmp/server-ca.pem"
+      sslkey  = "/tmp/client-key.pem"
+    }
+  }
+]
+```
 
 ## D. Ensuring quality
 
